@@ -9,4 +9,24 @@ contract State {
     function changeDiamonAddress(address newDiamond) external {
         diamondAddress = newDiamond;
     }
+
+    // FIXME: this is inspired by the example from the diamond EIP. There might be a better implementation
+    // Route all function calls to the main Diamond contract
+    fallback() external payable {
+        // Need to copy address because only local addresses are supported in assembly
+        address diamond = diamondAddress;
+
+        assembly {
+            // copy function selector
+            calldatacopy(0,0, calldatasize())
+            // call the diamond with this contract's context
+            let result := delegatecall(gas(), diamond, 0, calldatasize(), 0, 0)
+            // copy the return value from the previous call
+            returndatacopy(0, 0, returndatasize())
+
+            switch result
+                case 0 { revert(0, returndatasize()) }
+                default { return (0, returndatasize()) }
+        }
+    }
 }
