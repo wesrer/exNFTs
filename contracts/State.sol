@@ -10,7 +10,6 @@ contract State {
         diamondAddress = newDiamond;
     }
 
-    // FIXME: this is inspired by the example from the diamond EIP. There might be a better implementation
     // Route all function calls to the main Diamond contract
     fallback() external payable {
         // Need to copy address because only local addresses are supported in assembly
@@ -25,8 +24,14 @@ contract State {
             returndatacopy(0, 0, returndatasize())
 
             switch result
-                case 0 { revert(0, returndatasize()) }
-                default { return (0, returndatasize()) }
+                case 0 { 
+                    revert(0, returndatasize()) 
+                }
+                default { 
+                    return (0, returndatasize()) 
+                }
         }
     }
+
+    receive() external payable {}
 }
